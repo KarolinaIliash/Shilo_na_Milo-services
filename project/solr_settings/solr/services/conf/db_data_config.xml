@@ -1,0 +1,19 @@
+<dataConfig>
+    <dataSource type="JdbcDataSource" driver="org.postgresql.Driver" url="jdbc:postgresql://localhost:5432/services" user="standard_user" password="user" />
+    <document>
+        <entity name="service"
+		query="select * from services_table"
+		deltaImportQuery="select * from services_table where id=${dih.delta.id}"
+                deltaQuery="select id from services_table where last_modified > '${dataimporter.last_index_time}'">
+			<field column="id" name="id" />
+			<field column="category" name="category" />
+			<field column="description" name="description" />
+			<field column="mark" name="mark" />
+			<field column="mark_amount" name="mark_amount" />
+			<field column="last_modified" name="last_modified" />
+			<field column="name" name="name" />
+			<field column="user_id" name="user_id"/>
+        </entity>
+    </document>
+</dataConfig>
+
