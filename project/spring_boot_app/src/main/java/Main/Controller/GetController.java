@@ -115,7 +115,7 @@ public class GetController {
         if(amount.isPresent() && amount.get() > 0)
             query.setRows(amount.get());
         else
-            query.setRows(Integer.MAX_VALUE);
+            query.setRows(100);
 
         if(start.isPresent() && start.get() > 0)
             query.setStart(start.get());
