@@ -1,10 +1,14 @@
 package Main.Controller;
 
 import Main.Entity.Service;
+import Main.SearchUtils.*;
+import Main.Constants.*;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.SpellCheckResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +36,7 @@ public class GetController {
     }
 
     @GetMapping("/id")
-    public Service getServiceById(@RequestParam Integer id){
+    public Answer<Service> getServiceById(@RequestParam Integer id){
         Service result = null;
 
         HttpSolrClient solr = getSolrClient();
@@ -47,11 +51,12 @@ public class GetController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result;
+
+        return new Answer<Service>(Codes.OK, result);
     }
 
     @GetMapping("/category")
-    public Iterable<Service> getServicesInCategory(@RequestParam String category,
+    public Answer<Iterable<Service>> getServicesInCategory(@RequestParam String category,
                                                    @RequestParam Optional<Integer> amount,
                                                    @RequestParam Optional<Integer> start){
         HttpSolrClient solr = getSolrClient();
@@ -61,11 +66,11 @@ public class GetController {
 
         setDefaults(query, amount, start);
 
-        return getByQuery(solr, query);
+        return new Answer<>(Codes.OK, getByQuery(solr, query));
     }
 
     @GetMapping("/user")
-    public Iterable<Service> getServicesByUser(@RequestParam Integer user,
+    public Answer<Iterable<Service>> getServicesByUser(@RequestParam Integer user,
                                                Optional<Integer> amount,
                                                Optional<Integer> start) {
         HttpSolrClient solr = getSolrClient();
@@ -75,13 +80,14 @@ public class GetController {
 
         setDefaults(query, amount, start);
 
-        return getByQuery(solr, query);
+        return new Answer<>(Codes.OK, getByQuery(solr, query));
     }
 
     @GetMapping("/intext")
-    public Iterable<Service> serviceByText(@RequestParam String text,
+    public Answer<Iterable<Service>> serviceByText(@RequestParam String text,
                                            Optional<Integer> amount,
                                            Optional<Integer> start){
+        text = text.toLowerCase();
         HttpSolrClient solr = getSolrClient();
 
         SolrQuery query = new SolrQuery();
@@ -89,7 +95,7 @@ public class GetController {
 
         setDefaults(query, amount, start);
 
-        return getByQuery(solr, query);
+        return new Answer<>(Codes.OK, getByQuery(solr, query));
     }
 
     private Service fillService(SolrDocument doc) {
@@ -121,7 +127,7 @@ public class GetController {
         try {
             LinkedList<Service> result = new LinkedList<>();
             QueryResponse response = solr.query(query);
-
+            SpellCheckResponse spr = response.getSpellCheckResponse();
             SolrDocumentList docList = response.getResults();
 
             for (SolrDocument doc : docList) {
