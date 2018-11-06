@@ -4,6 +4,7 @@ import Main.Constants.Codes;
 import Main.Entity.Service;
 import Main.Repository.ServiceRepository;
 import Main.SearchUtils.Answer;
+import Main.SearchUtils.EmptyAnswer;
 import Main.SearchUtils.UtilFuncs;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -74,5 +75,28 @@ public class AddUpdateController {
         UtilFuncs.UpdateDoc(result_service);
 
         return new Answer<>(Codes.OK, result_service);
+    }
+
+    @PutMapping("/delete/{id}")
+    public EmptyAnswer delete(@PathVariable Integer id) {
+        serviceRepository.deleteById(id);
+
+        boolean ok = true;
+
+        HttpSolrClient client = UtilFuncs.getSolrClient();
+        try {
+            client.deleteById(id.toString());
+            client.commit();
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+            ok = false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            ok = false;
+        }
+        //TODO implement bad codes support
+        //Integer code = ok ? Codes.OK : Codes.
+
+        return new EmptyAnswer(Codes.OK);
     }
 }
