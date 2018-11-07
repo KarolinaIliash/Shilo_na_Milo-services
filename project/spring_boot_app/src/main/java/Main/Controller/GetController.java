@@ -7,6 +7,9 @@ import Main.Constants.*;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.SpellCheckResponse;
+import org.apache.solr.client.solrj.response.SuggesterResponse;
 import org.apache.solr.common.SolrDocument;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,7 +91,6 @@ public class GetController {
     public Answer<ResultWithSuggestion> serviceByText(@RequestParam String text,
                                            Optional<Integer> amount,
                                            Optional<Integer> start){
-
         HttpSolrClient solr = UtilFuncs.getSolrClient();
         SolrQuery query = new SolrQuery();
         query.setRequestHandler("/spell");
@@ -161,5 +165,37 @@ public class GetController {
                 return new Answer<>(Codes.OK, result);
             }
         }
+    }
+
+    @GetMapping("/suggest")
+    public Answer<List<String>> serviceByText(@RequestParam String text){
+        HttpSolrClient solr = UtilFuncs.getSolrClient();
+        SolrQuery query = new SolrQuery();
+        query.setRequestHandler("/suggest");
+
+        text = text.toLowerCase();
+        query.set("q", text);
+        try {
+            List<String> result = new LinkedList<>();
+            QueryResponse response = solr.query(query);
+            SpellCheckResponse suggesterResponse = response.getSpellCheckResponse();
+            List<SpellCheckResponse.Collation> collationResult = suggesterResponse.getCollatedResults();
+            collationResult.sort(new Comparator<SpellCheckResponse.Collation>() {
+                @Override
+                public int compare(SpellCheckResponse.Collation o1, SpellCheckResponse.Collation o2) {
+                    return Long.compare(o2.getNumberOfHits(), o1.getNumberOfHits());
+                }
+            });
+
+            for(SpellCheckResponse.Collation collation : collationResult){
+                result.add(collation.getCollationQueryString());
+            }
+            return new Answer<>(Codes.OK, result);
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -87,15 +87,15 @@ public class UtilFuncs {
             QueryResponse response = solr.query(query);
 
             SpellCheckResponse spr = response.getSpellCheckResponse();
-            List<SpellCheckResponse.Collation> collation_result = spr.getCollatedResults();
-            collation_result.sort(new Comparator<SpellCheckResponse.Collation>() {
+            List<SpellCheckResponse.Collation> collationResult = spr.getCollatedResults();
+            collationResult.sort(new Comparator<SpellCheckResponse.Collation>() {
                 @Override
                 public int compare(SpellCheckResponse.Collation o1, SpellCheckResponse.Collation o2) {
                     return Long.compare(o2.getNumberOfHits(), o1.getNumberOfHits());
                 }
             });
 
-            for (SpellCheckResponse.Collation collation : collation_result){
+            for (SpellCheckResponse.Collation collation : collationResult){
                 String colQuery = collation.getCollationQueryString();
                 if(colQuery.contains("*")){
                     StringBuilder builder = new StringBuilder(colQuery);
