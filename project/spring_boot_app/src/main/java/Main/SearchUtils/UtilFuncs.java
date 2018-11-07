@@ -14,7 +14,9 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 public class UtilFuncs {
@@ -57,11 +59,10 @@ public class UtilFuncs {
             query.setStart(0);
     }
 
-    public static Iterable<Service> getByQuery(HttpSolrClient solr, SolrQuery query){
+    public static List<Service> getByQuery(HttpSolrClient solr, SolrQuery query){
         try {
             LinkedList<Service> result = new LinkedList<>();
             QueryResponse response = solr.query(query);
-            SpellCheckResponse spr = response.getSpellCheckResponse();
             SolrDocumentList docList = response.getResults();
 
             for (SolrDocument doc : docList) {
@@ -75,7 +76,48 @@ public class UtilFuncs {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
+    }
 
+    public static ResultWithSuggestion getByQueryWithSuggestion(HttpSolrClient solr,
+                                                                SolrQuery query){
+        try {
+            LinkedList<Service> result = new LinkedList<>();
+            LinkedList<String> collations = new LinkedList<>();
+            QueryResponse response = solr.query(query);
+
+            SpellCheckResponse spr = response.getSpellCheckResponse();
+            List<SpellCheckResponse.Collation> collation_result = spr.getCollatedResults();
+            collation_result.sort(new Comparator<SpellCheckResponse.Collation>() {
+                @Override
+                public int compare(SpellCheckResponse.Collation o1, SpellCheckResponse.Collation o2) {
+                    return Long.compare(o2.getNumberOfHits(), o1.getNumberOfHits());
+                }
+            });
+
+            for (SpellCheckResponse.Collation collation : collation_result){
+                String colQuery = collation.getCollationQueryString();
+                if(colQuery.contains("*")){
+                    StringBuilder builder = new StringBuilder(colQuery);
+                    builder.deleteCharAt(builder.length() - 1);
+                    builder.deleteCharAt(0);
+                    colQuery = builder.toString();
+                }
+                collations.add(colQuery);
+            }
+
+            SolrDocumentList docList = response.getResults();
+
+            for (SolrDocument doc : docList) {
+                result.add(fillService(doc));
+            }
+
+            return new ResultWithSuggestion(result, collations);
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

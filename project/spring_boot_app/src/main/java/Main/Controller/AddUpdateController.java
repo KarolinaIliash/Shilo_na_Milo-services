@@ -8,11 +8,7 @@ import Main.SearchUtils.EmptyAnswer;
 import Main.SearchUtils.UtilFuncs;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.response.UpdateResponse;
-import org.apache.solr.common.SolrInputDocument;
-import org.aspectj.apache.bcel.classfile.Code;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jmx.export.UnableToRegisterMBeanException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;

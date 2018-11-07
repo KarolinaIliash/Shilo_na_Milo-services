@@ -2,20 +2,27 @@ package Main.SearchUtils;
 
 import Main.Entity.Service;
 
-public class ResultWithSuggestion {
-    private Iterable<Service> result;
-    private Iterable<String> suggestion;
+import java.util.List;
 
-    public void setResult(Iterable<Service> result_){
+public class ResultWithSuggestion {
+    private List<Service> result;
+    private List<String> suggestion;
+
+    public ResultWithSuggestion(List<Service> result_, List<String> suggestion_){
         result = result_;
-    }
-    public Iterable<Service> getResult(){
-        return result;
-    }
-    public void setSuggestion(Iterable<String> suggestion_){
         suggestion = suggestion_;
     }
-    public Iterable<String> getSuggestion(){
+
+    public void setResult(List<Service> result_){
+        result = result_;
+    }
+    public List<Service> getResult(){
+        return result;
+    }
+    public void setSuggestion(List<String> suggestion_){
+        suggestion = suggestion_;
+    }
+    public List<String> getSuggestion(){
         return suggestion;
     }
 }

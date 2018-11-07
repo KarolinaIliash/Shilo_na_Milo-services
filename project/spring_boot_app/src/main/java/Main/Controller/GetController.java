@@ -3,22 +3,19 @@ package Main.Controller;
 import Main.Entity.Service;
 import Main.SearchUtils.*;
 import Main.Constants.*;
-import Main.SearchUtils.*;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.response.SpellCheckResponse;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -84,18 +81,85 @@ public class GetController {
         return new Answer<>(Codes.OK, UtilFuncs.getByQuery(solr, query));
     }
 
+    //TODO add limits by category
     @GetMapping("/intext")
-    public Answer<Iterable<Service>> serviceByText(@RequestParam String text,
+    public Answer<ResultWithSuggestion> serviceByText(@RequestParam String text,
                                            Optional<Integer> amount,
                                            Optional<Integer> start){
-        text = text.toLowerCase();
+
         HttpSolrClient solr = UtilFuncs.getSolrClient();
-
         SolrQuery query = new SolrQuery();
-        query.set("q", "_text_:*" + text + "*");
+        query.setRequestHandler("/spell");
 
-        UtilFuncs.setDefaults(query, amount, start);
+        text = text.toLowerCase();
+        //TODO think about digits in regex
+        String[] words = text.split("[^a-z]+");
 
-        return new Answer<>(Codes.OK, UtilFuncs.getByQuery(solr, query));
+        if(words.length > 1) {
+            // TODO maybe firstly search with full phrase then with 'and'
+            // and then what we have now
+            StringBuilder builder = new StringBuilder();
+            for (String word : words) {
+                builder.append(word + " ");
+            }
+            // delete last whitespace
+            builder.deleteCharAt(builder.length() - 1);
+
+            String queryText = builder.toString();
+            query.set("q", queryText);
+            ResultWithSuggestion result = UtilFuncs.getByQueryWithSuggestion(solr, query);
+            // return if we have some results
+            if(!result.getResult().isEmpty()){
+                return new Answer<>(Codes.OK, result);
+            }
+            builder = new StringBuilder();
+            for (String word : words){
+                builder.append("*" + word + "* ");
+            }
+            // delete last whitespace
+            builder.deleteCharAt(builder.length() - 1);
+            queryText = builder.toString();
+            query.setRequestHandler("/select");
+            query.set("q", queryText);
+            List<Service> services = UtilFuncs.getByQuery(solr, query);
+            if(!services.isEmpty() || result.getSuggestion().isEmpty()) {
+                return new Answer<>(Codes.OK,
+                        new ResultWithSuggestion(services, result.getSuggestion()));
+            }
+
+            // get the best suggestion
+            String collational = result.getSuggestion().get(0);
+            String[] collationalWords = collational.split("//s+");
+            builder = new StringBuilder();
+            for (String word : collationalWords){
+                builder.append("*" + word + "* ");
+            }
+            // delete last whitespace
+            builder.deleteCharAt(builder.length() - 1);
+
+            queryText = builder.toString();
+            query.set("q", queryText);
+            services = UtilFuncs.getByQuery(solr, query);
+            return new Answer<>(Codes.OK,
+                    new ResultWithSuggestion(services, result.getSuggestion()));
+        }
+        else{
+            query.set("q", "*" + text + "*");
+
+            UtilFuncs.setDefaults(query, amount, start);
+            ResultWithSuggestion result = UtilFuncs.getByQueryWithSuggestion(solr, query);
+            if(result.getResult().isEmpty() && !result.getSuggestion().isEmpty()){
+                SolrQuery additionalQuery = new SolrQuery();
+                additionalQuery.setRequestHandler("/spell");
+                // collational has full query text
+                additionalQuery.set("q", result.getSuggestion().get(0));
+                List<Service> additionalRes = UtilFuncs.getByQuery(solr, additionalQuery);
+                return new Answer<>(Codes.OK,
+                        new ResultWithSuggestion(additionalRes, result.getSuggestion()));
+            }
+            else{
+                return new Answer<>(Codes.OK, result);
+            }
+        }
     }
 }
