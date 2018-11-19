@@ -1,4 +1,4 @@
-package Main.security;
+/*package Main.security;
 
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 
 /**
  * Created by Julia on 9/26/2018
- */
+ *
 @Configuration
 @EnableWebSecurity
 @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
@@ -52,15 +52,17 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
         http.authorizeRequests()
-                .antMatchers("/services/add_service/*")
+                /*.antMatchers("/services/add_service/*")
                 .hasAnyRole("user", "admin")
                 .antMatchers("/services/update_service/*")
                 .hasAnyRole("user", "admin")
                 .antMatchers("/services/add_mark/*")
                 .hasAnyRole("user", "admin")
                 .antMatchers("/services/delete/*")
+                .hasAnyRole("user", "admin")*
+                .antMatchers("/s/")
                 .hasAnyRole("user", "admin")
                 .anyRequest()
                 .permitAll();
     }
-}
+}*/
