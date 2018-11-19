@@ -52,9 +52,14 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
         http.authorizeRequests()
-                // TODO Add protected resources
-                .antMatchers("/services/")
-                .hasAnyRole("user","admin")
+                .antMatchers("/services/add_service/*")
+                .hasAnyRole("user", "admin")
+                .antMatchers("/services/update_service/*")
+                .hasAnyRole("user", "admin")
+                .antMatchers("/services/add_mark/*")
+                .hasAnyRole("user", "admin")
+                .antMatchers("/services/delete/*")
+                .hasAnyRole("user", "admin")
                 .anyRequest()
                 .permitAll();
     }
