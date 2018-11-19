@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 public class UtilFuncs {
     public static Service fillService(SolrDocument doc) {
@@ -49,14 +48,14 @@ public class UtilFuncs {
         return doc;
     }
 
-    public static void setDefaults(SolrQuery query, Optional<Integer> amount, Optional<Integer> start){
-        if(amount.isPresent() && amount.get() > 0)
-            query.setRows(amount.get());
+    public static void setDefaults(SolrQuery query, Integer amount, Integer start){
+        if(amount != null && amount > 0)
+            query.setRows(amount);
         else
             query.setRows(100);
 
-        if(start.isPresent() && start.get() > 0)
-            query.setStart(start.get());
+        if(start != null && start > 0)
+            query.setStart(start);
         else
             query.setStart(0);
     }
@@ -145,5 +144,22 @@ public class UtilFuncs {
             return false;
         }
         return true;
+    }
+
+    public static void AddParametersToQuery(SolrQuery query, Double mark,
+                                            Double priceFrom, Double priceTo,
+                                            String category){
+        if(mark != null){
+            Double from = mark - 0.5;
+            Double to = mark + 0.5;
+            query.addFilterQuery(StringConstants.Mark + ":[" + from.toString() + " TO " + to.toString() + "]");
+        }
+        if(priceFrom != null && priceTo != null){
+            query.addFilterQuery(StringConstants.Price + ":[" + priceFrom.toString() + " TO "
+                      + priceTo.toString() + "]");
+        }
+        if(category != null){
+            query.addFilterQuery(StringConstants.Category + ":" + category);
+        }
     }
 }

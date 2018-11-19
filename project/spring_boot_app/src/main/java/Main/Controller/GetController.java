@@ -9,25 +9,19 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SpellCheckResponse;
-import org.apache.solr.client.solrj.response.SuggesterResponse;
 import org.apache.solr.common.SolrDocument;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping(path="/services")
 public class GetController {
     @GetMapping("/all")
-    public Iterable<Service> getAllServices(@RequestParam Optional<Integer> amount, @RequestParam Optional<Integer> start) {
+    public Iterable<Service> getAllServices(@RequestParam(required=false) Integer amount,
+                                            @RequestParam(required=false) Integer start) {
         HttpSolrClient solr = UtilFuncs.getSolrClient();
 
         SolrQuery query = new SolrQuery();
@@ -60,8 +54,8 @@ public class GetController {
 
     @GetMapping("/category")
     public Answer<Iterable<Service>> getServicesInCategory(@RequestParam String category,
-                                                   @RequestParam Optional<Integer> amount,
-                                                   @RequestParam Optional<Integer> start){
+                                                   @RequestParam(required=false) Integer amount,
+                                                   @RequestParam(required=false) Integer start){
         HttpSolrClient solr = UtilFuncs.getSolrClient();
 
         SolrQuery query = new SolrQuery();
@@ -74,8 +68,8 @@ public class GetController {
 
     @GetMapping("/user")
     public Answer<Iterable<Service>> getServicesByUser(@RequestParam Integer user,
-                                               Optional<Integer> amount,
-                                               Optional<Integer> start) {
+                                                       @RequestParam(required=false) Integer amount,
+                                                       @RequestParam(required=false) Integer start) {
         HttpSolrClient solr = UtilFuncs.getSolrClient();
 
         SolrQuery query = new SolrQuery();
@@ -89,12 +83,18 @@ public class GetController {
     //TODO add limits by category
     @GetMapping("/intext")
     public Answer<ResultWithSuggestion> serviceByText(@RequestParam String text,
-                                           Optional<Integer> amount,
-                                           Optional<Integer> start){
+                                                      @RequestParam(required=false) Integer amount,
+                                                      @RequestParam(required=false) Integer start,
+                                                      @RequestParam(required=false) Double mark,
+                                                      @RequestParam(required=false) Double priceFrom,
+                                                      @RequestParam(required=false) Double priceTo,
+                                                      @RequestParam(required=false) String category){
         HttpSolrClient solr = UtilFuncs.getSolrClient();
         SolrQuery query = new SolrQuery();
         query.setRequestHandler("/spell");
 
+        UtilFuncs.setDefaults(query, amount, start);
+        UtilFuncs.AddParametersToQuery(query, mark, priceFrom, priceTo, category);
         text = text.toLowerCase();
         //TODO think about digits in regex
         String[] words = text.split("[^a-z]+");
@@ -150,7 +150,6 @@ public class GetController {
         else{
             query.set("q", "*" + text + "*");
 
-            UtilFuncs.setDefaults(query, amount, start);
             ResultWithSuggestion result = UtilFuncs.getByQueryWithSuggestion(solr, query);
             if(result.getResult().isEmpty() && !result.getSuggestion().isEmpty()){
                 SolrQuery additionalQuery = new SolrQuery();
