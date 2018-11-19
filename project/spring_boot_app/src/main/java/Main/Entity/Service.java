@@ -28,6 +28,8 @@ public class Service {
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date last_modified;
 
+    private Double price;
+
     public void setId(Integer id_) {
         id = id_;
     }
@@ -77,5 +79,11 @@ public class Service {
     }
     public Date getLast_modified(){
         return last_modified;
+    }
+    public void setPrice(Double price_){
+        price = price_;
+    }
+    public Double getPrice() {
+        return price;
     }
 }

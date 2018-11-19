@@ -10,4 +10,5 @@ public class StringConstants {
     public static final String Name = "name";
     public static final String UserId = "user_id";
     public static final String LastModified = "last_modified";
+    public static final String Price = "price";
 }

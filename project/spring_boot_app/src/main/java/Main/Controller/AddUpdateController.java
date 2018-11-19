@@ -44,6 +44,7 @@ public class AddUpdateController {
                     service.setCategory(newService.getCategory());
                     service.setMark(newService.getMark());
                     service.setMark_amount(newService.getMark_amount());
+                    service.setPrice(newService.getPrice());
                     service.setLast_modified(new Date());
                     return serviceRepository.save(service);
                 })

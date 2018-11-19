@@ -13,6 +13,7 @@
 			<field column="last_modified" name="last_modified" />
 			<field column="name" name="name" />
 			<field column="user_id" name="user_id"/>
+			<field column="price" name="price"/>
         </entity>
     </document>
 </dataConfig>

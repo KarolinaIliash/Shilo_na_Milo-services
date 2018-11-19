@@ -125,11 +125,10 @@
 	<field name="last_modified" type="pdate" indexed="false" multiValued="false" stored="true"/>
 	<field name="category" type="category" indexed="true" multiValued="false" stored="true"/>
 	<field name="user_id" type="pint" indexed="true" multiValued="false" stored="true"/>
+	<field name="price" type="pfloat" indexed="true" multiValued="false" stored="true"/>
 	
 	<copyField source="name" dest="_text_"/>
 	<copyField source="category" dest="_text_"/>
-	
-	<!---<field name="any_string" type="any_string" indexed="true" multiValued="true" stored=""true/>-->
 	
 	<fieldType name="category" class="solr.TextField" positionIncrementGap="100">
 		<analyzer type="index">
