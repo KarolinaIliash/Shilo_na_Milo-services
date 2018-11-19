@@ -102,29 +102,15 @@ public class GetController {
         if(words.length > 1) {
             // TODO maybe firstly search with full phrase then with 'and'
             // and then what we have now
-            StringBuilder builder = new StringBuilder();
-            for (String word : words) {
-                builder.append(word + " ");
-            }
-            // delete last whitespace
-            builder.deleteCharAt(builder.length() - 1);
-
-            String queryText = builder.toString();
-            query.set("q", queryText);
+            query.set("q", toDelimetedString(words, "", " "));
             ResultWithSuggestion result = UtilFuncs.getByQueryWithSuggestion(solr, query);
             // return if we have some results
             if(!result.getResult().isEmpty()){
                 return new Answer<>(Codes.OK, result);
             }
-            builder = new StringBuilder();
-            for (String word : words){
-                builder.append("*" + word + "* ");
-            }
-            // delete last whitespace
-            builder.deleteCharAt(builder.length() - 1);
-            queryText = builder.toString();
+            
             query.setRequestHandler("/select");
-            query.set("q", queryText);
+            query.set("q", toDelimetedString(words, "*", "* "));
             List<Service> services = UtilFuncs.getByQuery(solr, query);
             if(!services.isEmpty() || result.getSuggestion().isEmpty()) {
                 return new Answer<>(Codes.OK,
@@ -132,17 +118,8 @@ public class GetController {
             }
 
             // get the best suggestion
-            String collational = result.getSuggestion().get(0);
-            String[] collationalWords = collational.split("//s+");
-            builder = new StringBuilder();
-            for (String word : collationalWords){
-                builder.append("*" + word + "* ");
-            }
-            // delete last whitespace
-            builder.deleteCharAt(builder.length() - 1);
-
-            queryText = builder.toString();
-            query.set("q", queryText);
+            words = result.getSuggestion().get(0).split("//s+");
+            query.set("q", toDelimetedString(words, "*", "* "));
             services = UtilFuncs.getByQuery(solr, query);
             return new Answer<>(Codes.OK,
                     new ResultWithSuggestion(services, result.getSuggestion()));
@@ -196,5 +173,16 @@ public class GetController {
             e.printStackTrace();
         }
         return null;
+    }
+   
+    private String toDelimetedString(String[] words, String prefix, String suffix){
+        StringBuilder builder = new StringBuilder();
+        for (String word : words) {
+            builder.append(prefix + word + suffix);
+        }
+        // delete last whitespace
+        builder.deleteCharAt(builder.length() - 1);
+        
+        return builder.toString();
     }
 }
