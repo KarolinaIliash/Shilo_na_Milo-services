@@ -21,11 +21,15 @@ import java.util.*;
 public class GetController {
     @GetMapping("/all")
     public Iterable<Service> getAllServices(@RequestParam(required=false) Integer amount,
-                                            @RequestParam(required=false) Integer start) {
+                                            @RequestParam(required=false) Integer start,
+                                            @RequestParam(required=false) String fieldToSort,
+                                            @RequestParam(required=false) Boolean asc) {
         HttpSolrClient solr = UtilFuncs.getSolrClient();
 
         SolrQuery query = new SolrQuery();
         query.set("q", "*:*");
+
+        UtilFuncs.setSort(query, fieldToSort, asc);
 
         UtilFuncs.setDefaults(query, amount, start);
 
@@ -55,11 +59,14 @@ public class GetController {
     @GetMapping("/category")
     public Answer<Iterable<Service>> getServicesInCategory(@RequestParam String category,
                                                    @RequestParam(required=false) Integer amount,
-                                                   @RequestParam(required=false) Integer start){
+                                                   @RequestParam(required=false) Integer start,
+                                                   @RequestParam(required=false) String fieldToSort,
+                                                   @RequestParam(required=false) Boolean asc){
         HttpSolrClient solr = UtilFuncs.getSolrClient();
 
         SolrQuery query = new SolrQuery();
         query.set("q", "category:" + category);
+        UtilFuncs.setSort(query, fieldToSort, asc);
 
         UtilFuncs.setDefaults(query, amount, start);
 
@@ -69,32 +76,39 @@ public class GetController {
     @GetMapping("/user")
     public Answer<Iterable<Service>> getServicesByUser(@RequestParam Integer user,
                                                        @RequestParam(required=false) Integer amount,
-                                                       @RequestParam(required=false) Integer start) {
+                                                       @RequestParam(required=false) Integer start,
+                                                       @RequestParam(required=false) String fieldToSort,
+                                                       @RequestParam(required=false) Boolean asc) {
         HttpSolrClient solr = UtilFuncs.getSolrClient();
 
         SolrQuery query = new SolrQuery();
         query.set("q", "user_id:" + user.toString());
 
         UtilFuncs.setDefaults(query, amount, start);
+        UtilFuncs.setSort(query, fieldToSort, asc);
 
         return new Answer<>(Codes.OK, UtilFuncs.getByQuery(solr, query));
     }
 
-    //TODO add limits by category
-    @GetMapping("/intext")
-    public Answer<ResultWithSuggestion> serviceByText(@RequestParam String text,
+    @GetMapping("/filter")
+    public Answer<ResultWithSuggestion> serviceByText(@RequestParam(required=false) String text,
                                                       @RequestParam(required=false) Integer amount,
                                                       @RequestParam(required=false) Integer start,
                                                       @RequestParam(required=false) Double mark,
                                                       @RequestParam(required=false) Double priceFrom,
                                                       @RequestParam(required=false) Double priceTo,
-                                                      @RequestParam(required=false) String category){
+                                                      @RequestParam(required=false) String category,
+                                                      @RequestParam(required=false) String fieldToSort,
+                                                      @RequestParam(required=false) Boolean asc){
         HttpSolrClient solr = UtilFuncs.getSolrClient();
         SolrQuery query = new SolrQuery();
         query.setRequestHandler("/spell");
 
         UtilFuncs.setDefaults(query, amount, start);
+        UtilFuncs.setSort(query, fieldToSort, asc);
         UtilFuncs.AddParametersToQuery(query, mark, priceFrom, priceTo, category);
+        if(text == null)
+            text = "";
         text = text.toLowerCase();
         //TODO think about digits in regex
         String[] words = text.split("[^a-z]+");
@@ -147,22 +161,26 @@ public class GetController {
             return new Answer<>(Codes.OK,
                     new ResultWithSuggestion(services, result.getSuggestion()));
         }
-        else{
+        else if(words.length == 1 && words[0] != ""){
             query.set("q", "*" + text + "*");
 
             ResultWithSuggestion result = UtilFuncs.getByQueryWithSuggestion(solr, query);
             if(result.getResult().isEmpty() && !result.getSuggestion().isEmpty()){
-                SolrQuery additionalQuery = new SolrQuery();
-                additionalQuery.setRequestHandler("/spell");
+                query.setRequestHandler("/spell");
                 // collational has full query text
-                additionalQuery.set("q", result.getSuggestion().get(0));
-                List<Service> additionalRes = UtilFuncs.getByQuery(solr, additionalQuery);
+                query.set("q", result.getSuggestion().get(0));
+                List<Service> additionalRes = UtilFuncs.getByQuery(solr, query);
                 return new Answer<>(Codes.OK,
                         new ResultWithSuggestion(additionalRes, result.getSuggestion()));
             }
             else{
                 return new Answer<>(Codes.OK, result);
             }
+        }
+        else{
+            query.set("q", "*:*");
+            ResultWithSuggestion result = UtilFuncs.getByQueryWithSuggestion(solr, query);
+            return new Answer<>(Codes.OK, result);
         }
     }
 
