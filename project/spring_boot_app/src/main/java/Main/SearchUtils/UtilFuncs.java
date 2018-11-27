@@ -149,7 +149,7 @@ public class UtilFuncs {
 
     public static void AddParametersToQuery(SolrQuery query, Double mark,
                                             Double priceFrom, Double priceTo,
-                                            String category){
+                                            List<String> categories){
         if(mark != null){
             Double from = mark - 0.5;
             Double to = mark + 0.5;
@@ -159,9 +159,20 @@ public class UtilFuncs {
             query.addFilterQuery(StringConstants.Price + ":[" + priceFrom.toString() + " TO "
                       + priceTo.toString() + "]");
         }
-        if(category != null){
-            query.addFilterQuery(StringConstants.Category + ":" + category);
+        
+        StringBuilder categoriesQuery = new StringBuilder();
+        int i = 0;
+
+        for (String category : categories){
+            if(i != 0)
+                categoriesQuery.append(" OR ");
+            categoriesQuery.append(StringConstants.Category + ":" + category);
+            i++;
         }
+
+        String categoriesQueryStr = categoriesQuery.toString();
+        if(!categoriesQueryStr.isEmpty())
+            query.addFilterQuery(categoriesQueryStr);
     }
 
     public static void setSort(SolrQuery query, String field, Boolean asc){

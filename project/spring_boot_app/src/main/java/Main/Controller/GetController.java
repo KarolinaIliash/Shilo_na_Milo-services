@@ -97,7 +97,7 @@ public class GetController {
                                                       @RequestParam(required=false) Double mark,
                                                       @RequestParam(required=false) Double priceFrom,
                                                       @RequestParam(required=false) Double priceTo,
-                                                      @RequestParam(required=false) String category,
+                                                      @RequestParam(required=false) List<String> category,
                                                       @RequestParam(required=false) String fieldToSort,
                                                       @RequestParam(required=false) Boolean asc){
         HttpSolrClient solr = UtilFuncs.getSolrClient();
