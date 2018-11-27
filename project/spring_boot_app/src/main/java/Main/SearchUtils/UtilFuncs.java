@@ -159,20 +159,20 @@ public class UtilFuncs {
             query.addFilterQuery(StringConstants.Price + ":[" + priceFrom.toString() + " TO "
                       + priceTo.toString() + "]");
         }
-        
-        StringBuilder categoriesQuery = new StringBuilder();
-        int i = 0;
 
-        for (String category : categories){
-            if(i != 0)
-                categoriesQuery.append(" OR ");
-            categoriesQuery.append(StringConstants.Category + ":" + category);
-            i++;
+        if(categories != null) {
+            StringBuilder categoriesQuery = new StringBuilder();
+            int i = 0;
+            for (String category : categories) {
+                if (i != 0)
+                    categoriesQuery.append(" OR ");
+                categoriesQuery.append(StringConstants.Category + ":" + category);
+                i++;
+            }
+            String categoriesQueryStr = categoriesQuery.toString();
+            if(!categoriesQueryStr.isEmpty())
+                query.addFilterQuery(categoriesQueryStr);
         }
-
-        String categoriesQueryStr = categoriesQuery.toString();
-        if(!categoriesQueryStr.isEmpty())
-            query.addFilterQuery(categoriesQueryStr);
     }
 
     public static void setSort(SolrQuery query, String field, Boolean asc){
