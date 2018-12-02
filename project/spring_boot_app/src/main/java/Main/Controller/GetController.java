@@ -74,7 +74,7 @@ public class GetController {
     }
 
     @GetMapping("/user")
-    public Answer<Iterable<Service>> getServicesByUser(@RequestParam Integer user,
+    public Answer<Iterable<Service>> getServicesByUser(@RequestParam String user,
                                                        @RequestParam(required=false) Integer amount,
                                                        @RequestParam(required=false) Integer start,
                                                        @RequestParam(required=false) String fieldToSort,
@@ -82,7 +82,7 @@ public class GetController {
         HttpSolrClient solr = UtilFuncs.getSolrClient();
 
         SolrQuery query = new SolrQuery();
-        query.set("q", "user_id:" + user.toString());
+        query.set("q", "user_id:" + user);
 
         UtilFuncs.setDefaults(query, amount, start);
         UtilFuncs.setSort(query, fieldToSort, asc);
