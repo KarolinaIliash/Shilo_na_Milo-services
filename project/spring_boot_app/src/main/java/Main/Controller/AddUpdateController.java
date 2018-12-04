@@ -82,8 +82,12 @@ public class AddUpdateController {
         try {
             Service result_service = serviceRepository.findById(id)
                     .map(service -> {
-                        service.setMark_amount(service.getMark_amount() + 1);
-                        service.setMark((mark + service.getMark()) / service.getMark_amount());
+                        //service.setMark_amount(service.getMark_amount() + 1);
+                        //service.setMark((mark + service.getMark()) / service.getMark_amount());
+                        int newAmount = service.getMark_amount() + 1;
+                        double newMark = (service.getMark() * service.getMark_amount() + mark) / newAmount;
+                        service.setMark(newMark);
+                        service.setMark_amount(newAmount);
                         service.setLast_modified(new Date());
                         return serviceRepository.save(service);
                     })
