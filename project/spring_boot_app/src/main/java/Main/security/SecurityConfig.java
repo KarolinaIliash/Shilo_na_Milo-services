@@ -1,4 +1,6 @@
-/*package Main.security;
+package Main.security;
+
+import java.util.Arrays;
 
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
@@ -15,15 +17,15 @@ import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
-
-/**
- * Created by Julia on 9/26/2018
- *
 @Configuration
 @EnableWebSecurity
 @ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
-public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
+class keycloakConfig extends KeycloakWebSecurityConfigurerAdapter {
 
     @Autowired
     public void configureGlobal(
@@ -47,22 +49,36 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         return new RegisterSessionAuthenticationStrategy(
                 new SessionRegistryImpl());
     }
-
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        final CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH","OPTIONS"));
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedMethods("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH","OPTIONS");
+    }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
+        http.csrf().disable();
+        http.cors();
         http.authorizeRequests()
-                /*.antMatchers("/services/add_service/*")
+                .antMatchers("/services/add_service/*")
                 .hasAnyRole("user", "admin")
                 .antMatchers("/services/update_service/*")
                 .hasAnyRole("user", "admin")
-                .antMatchers("/services/add_mark/*")
-                .hasAnyRole("user", "admin")
                 .antMatchers("/services/delete/*")
-                .hasAnyRole("user", "admin")*
-                .antMatchers("/s/")
+                .hasAnyRole("user", "admin")
+                .antMatchers("/services/add_mark/*")
                 .hasAnyRole("user", "admin")
                 .anyRequest()
                 .permitAll();
     }
-}*/
+}

@@ -124,7 +124,7 @@
 	<field name="name" type="text_mine" indexed="true" multiValued="false" stored="true"/>
 	<field name="last_modified" type="pdate" indexed="false" multiValued="false" stored="true"/>
 	<field name="category" type="category" indexed="true" multiValued="false" stored="true"/>
-	<field name="user_id" type="pint" indexed="true" multiValued="false" stored="true"/>
+	<field name="user_id" type="text_no_change" indexed="true" multiValued="false" stored="true"/>
 	<field name="price" type="pfloat" indexed="true" multiValued="false" stored="true"/>
 	
 	<copyField source="name" dest="_text_"/>
@@ -141,6 +141,12 @@
 	
 	<fieldType name="any_string" class="solr.TextField">
 		
+	</fieldType>
+	
+	<fieldType name="text_no_change" class="solr.TextField" positionIncrementGap="100">
+		<analyzer>
+			<tokenizer class="solr.KeywordTokenizerFactory"/>
+		</analyzer>
 	</fieldType>
 
     <!-- This can be enabled, in case the client does not know what fields may be searched. It isn't enabled by default

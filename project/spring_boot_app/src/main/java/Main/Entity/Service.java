@@ -17,7 +17,7 @@ public class Service {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private Integer user_id;
+    private String user_id;
 
     private String category;
 
@@ -48,10 +48,10 @@ public class Service {
     public String getDescription(){
         return description;
     }
-    public void setUser_id(Integer user_id_) {
+    public void setUser_id(String user_id_) {
         user_id = user_id_;
     }
-    public Integer getUser_id(){
+    public String getUser_id(){
         return user_id;
     }
     public void setCategory(String category_){

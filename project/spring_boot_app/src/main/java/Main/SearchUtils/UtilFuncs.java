@@ -27,7 +27,7 @@ public class UtilFuncs {
         service.setName(doc.getFieldValue(StringConstants.Name).toString());
         service.setDescription(doc.getFieldValue(StringConstants.Description).toString());
         service.setCategory(doc.getFieldValue(StringConstants.Category).toString());
-        service.setUser_id(Integer.parseInt(doc.getFieldValue(StringConstants.UserId).toString()));
+        service.setUser_id(doc.getFieldValue(StringConstants.UserId).toString());
         service.setPrice(Double.parseDouble(doc.getFieldValue(StringConstants.Price).toString()));
 
         return service;

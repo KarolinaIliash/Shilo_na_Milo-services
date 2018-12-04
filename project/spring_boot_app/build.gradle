@@ -27,10 +27,10 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
     compile 'org.postgresql:postgresql:42.1.1'
     compile group: 'org.apache.solr', name: 'solr-solrj', version: '7.5.0'
-    /*compile group: 'org.springframework.security', name: 'spring-security-config', version: '5.1.1.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-config', version: '5.1.1.RELEASE'
     compile group: 'org.springframework.security', name: 'spring-security-web', version: '5.1.1.RELEASE'
     compile group: 'org.keycloak', name: 'keycloak-core', version: '4.6.0.Final'
-    compile group: 'org.keycloak', name: 'keycloak-spring-boot-starter', version: '4.6.0.Final'*/
+    compile group: 'org.keycloak', name: 'keycloak-spring-boot-starter', version: '4.6.0.Final'
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
