@@ -60,8 +60,8 @@ public class UtilFuncs {
             query.setStart(0);
     }
 
-    public static List<Service> getByQuery(HttpSolrClient solr, SolrQuery query){
-        try {
+    public static List<Service> getByQuery(HttpSolrClient solr, SolrQuery query) throws IOException, SolrServerException {
+        //try {
             LinkedList<Service> result = new LinkedList<>();
             QueryResponse response = solr.query(query);
             SolrDocumentList docList = response.getResults();
@@ -72,17 +72,17 @@ public class UtilFuncs {
             }
 
             return result;
-        } catch (SolrServerException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        //} catch (SolrServerException e) {
+        //    e.printStackTrace();
+        //} catch (IOException e) {
+        //    e.printStackTrace();
+        //}
+        //return null;
     }
 
     public static ResultWithSuggestion getByQueryWithSuggestion(HttpSolrClient solr,
-                                                                SolrQuery query){
-        try {
+                                                                SolrQuery query) throws IOException, SolrServerException {
+        //try {
             LinkedList<Service> result = new LinkedList<>();
             LinkedList<String> collations = new LinkedList<>();
             QueryResponse response = solr.query(query);
@@ -115,12 +115,12 @@ public class UtilFuncs {
             }
 
             return new ResultWithSuggestion(result, collations);
-        } catch (SolrServerException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        //} catch (SolrServerException e) {
+        //    e.printStackTrace();
+        //} catch (IOException e) {
+        //    e.printStackTrace();
+        //}
+        //return null;
     }
 
     public static HttpSolrClient getSolrClient(){
@@ -129,21 +129,20 @@ public class UtilFuncs {
         return solr;
     }
 
-    public static boolean UpdateDoc(Service service)
-    {
+    public static boolean UpdateDoc(Service service) throws IOException, SolrServerException {
         HttpSolrClient client = UtilFuncs.getSolrClient();
         SolrInputDocument doc = fillService(service);
-        try {
+        //try {
             final UpdateResponse updateResponse = client.add(doc);
             client.commit();
             int status = updateResponse.getStatus();
-        } catch (SolrServerException e) {
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        //} catch (SolrServerException e) {
+        //    e.printStackTrace();
+        //    return false;
+        //} catch (IOException e) {
+        //    e.printStackTrace();
+        //    return false;
+       //}
         return true;
     }
 

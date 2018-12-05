@@ -31,6 +31,18 @@ public class AddUpdateController {
             if (newService.getPrice() == null) {
                 newService.setPrice(0d);
             }
+            if(newService.getName() == null){
+                newService.setName("");
+            }
+            if(newService.getCategory() == null){
+                newService.setCategory("");
+            }
+            if(newService.getDescription() == null){
+                newService.setDescription("");
+            }
+            if(newService.getUser_id() == null){
+                newService.setUser_id("");
+            }
             newService = serviceRepository.save(newService);
 
             UtilFuncs.UpdateDoc(newService);
@@ -82,12 +94,8 @@ public class AddUpdateController {
         try {
             Service result_service = serviceRepository.findById(id)
                     .map(service -> {
-                        //service.setMark_amount(service.getMark_amount() + 1);
-                        //service.setMark((mark + service.getMark()) / service.getMark_amount());
-                        int newAmount = service.getMark_amount() + 1;
-                        double newMark = (service.getMark() * service.getMark_amount() + mark) / newAmount;
-                        service.setMark(newMark);
-                        service.setMark_amount(newAmount);
+                        service.setMark_amount(service.getMark_amount() + 1);
+                        service.setMark((mark + service.getMark()) / service.getMark_amount());
                         service.setLast_modified(new Date());
                         return serviceRepository.save(service);
                     })
